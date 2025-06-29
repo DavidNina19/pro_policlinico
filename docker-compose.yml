@@ -1,0 +1,184 @@
+services:
+    db:
+      image: mysql:8.0
+      environment:
+        - MYSQL_DATABASE=clinica
+        - MYSQL_PASSWORD=root
+        - MYSQL_ROOT_PASSWORD=root
+      ports:
+        - "3307:3306"
+      volumes:
+        - mysql_data:/var/lib/mysql
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+        interval: 5s
+        timeout: 5s
+        retries: 10
+      networks:
+        - app_network
+
+    gethora:
+      build:
+        context: ./getHora
+      ports:
+        - "5001:5000"
+      volumes:
+        - ./getHora:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+
+    sethora:
+      build:
+        context: ./setHora
+      ports:
+        - "5000:5000"
+      volumes:
+        - ./setHora:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+
+    getmedico:
+      build:
+        context: ./getMedico
+      ports:
+        - "5002:5000"
+      volumes:
+        - ./getMedico:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+
+    setmedico:
+      build:
+        context: ./setMedico
+      ports:
+        - "5003:5000"
+      volumes:
+        - ./setMedico:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+
+    getempleado:
+      build:
+        context: ./getEmpleado
+      ports:
+        - "5004:5000"
+      volumes:
+        - ./getEmpleado:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+
+    setempleado:
+      build:
+        context: ./setEmpleado
+      ports:
+        - "5005:5000"
+      volumes:
+        - ./setEmpleado:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+        
+    gethorario:
+      build:
+        context: ./getHorario
+      ports:
+        - "5006:5000"
+      volumes:
+        - ./getHorario:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    detallemedico:
+      build:
+        context: ./detallemedico
+      ports:
+        - "5007:5000"
+      volumes:
+        - ./detallemedico:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+
+volumes:
+  mysql_data:
+
+networks:
+  app_network:
+    driver: bridge

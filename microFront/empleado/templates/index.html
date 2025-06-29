@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+  <html lang="es">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+      <title>Gestión de Médicos</title>
+      <!-- <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .form-group { margin-bottom: 15px; }
+          label { display: block; margin-bottom: 5px; }
+          input, button { padding: 5px; }
+          #medicoList { margin-top: 20px; }
+      </style> -->
+  </head>
+  <body>
+    <div class="container">
+        <div class="row">
+            <h2>Grabar Médico</h2>
+            <div class="container">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="nomMed" placeholder="Luis Gonzales">
+                            <label for="nomMed">Nombre:</label>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="especial" required placeholder="odontologia">
+                            <label for="especial">Especialidad:</label>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="estado" required placeholder="activo">
+                            <label for="estado">Estado:</label>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <button class="px-5 py-3 btn btn-outline-info fw-bold border border-3 border-info" onclick="grabarMedico()">Grabar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="container">
+                            <h2>Buscar Médico</h2>
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="form-floating mb-3">
+                                        <input type="number" class="form-control" id="codMedSearch" required placeholder="1">
+                                        <label for="codMedSearch">Código Médico:</label>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <button class="px-5 py-3 btn btn-outline-info fw-bold border border-3 border-info" onclick="buscarMedico()">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="container">
+                            <h2>Listar Médicos</h2>
+                            <div class="row">
+                                <div class="col-6">
+                                    <button class="px-5 py-3 btn btn-outline-info fw-bold border border-3 border-info" onclick="listarMedicos()">Listar Todos</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+      
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-12 border border-2 border-info">
+                        <div id="medicoList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+      <script>
+          async function grabarMedico() {
+              const nomMed = document.getElementById('nomMed').value;
+              const especial = document.getElementById('especial').value;
+              const estado = document.getElementById('estado').value;
+
+              const data = { nomMed, especial, estado };
+              try {
+                  const response = await fetch('http://localhost:5003/set/medico/', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(data)
+                  });
+                  const result = await response.json();
+                  alert('Médico grabado: ' + JSON.stringify(result));
+                  listarMedicos(); // Actualizar lista después de grabar
+              } catch (error) {
+                  alert('Error al grabar: ' + error.message);
+              }
+          }
+
+          async function buscarMedico() {
+              const codMed = document.getElementById('codMedSearch').value;
+              try {
+                  const response = await fetch(`http://localhost:5002/listar/medico/?codMed=${codMed}`);
+                  const medicos = await response.json();
+                  mostrarMedicos(medicos);
+              } catch (error) {
+                  alert('Error al buscar: ' + error.message);
+              }
+          }
+
+          async function listarMedicos() {
+              try {
+                  const response = await fetch('http://localhost:5002/listar/medico/');
+                  const medicos = await response.json();
+                  mostrarMedicos(medicos);
+              } catch (error) {
+                  alert('Error al listar: ' + error.message);
+              }
+          }
+
+          function mostrarMedicos(medicos) {
+              const listDiv = document.getElementById('medicoList');
+              listDiv.innerHTML = '<h3>Resultado de Médicos:</h3>';
+              if (medicos.length > 0) {
+                  const ul = document.createElement('ul');
+                  medicos.forEach(medico => {
+                      const li = document.createElement('li');
+                      li.textContent = `Código: ${medico.codMed}, Nombre: ${medico.nomMed}, Especialidad: ${medico.especial}, Estado: ${medico.estado}`;
+                      ul.appendChild(li);
+                  });
+                  listDiv.appendChild(ul);
+              } else {
+                  listDiv.innerHTML += '<p>No se encontraron médicos.</p>';
+              }
+          }
+      </script>
+  </body>
+  </html>
