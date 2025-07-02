@@ -16,7 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from horarioApp.views import HorarioListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('listar/horario/<str:ident>/', HorarioListView.as_view(), name='horario_list'),
+
 ]

@@ -17,7 +17,7 @@ class DetalleMedicoCreateView(APIView):
 
 # Listar todos los registros (GET)
 class DetalleMedicoListView(APIView):
-    def get(self    , request):
+    def get(self, request):
         detalles = DetalleMedico.objects.all()
         serializer = DetalleMedicoSerializer(detalles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

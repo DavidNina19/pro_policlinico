@@ -23,9 +23,11 @@ class DetalleMedicoSerializer(serializers.ModelSerializer):
 
     def get_fecHora(self, obj):
         try:
-            response = requests.get(f'http://gethorario:5006/gethora/{obj.numHor}/')  # Asegúrate del nombre del contenedor
+            response = requests.get(f'http://gethorario:5000/listar/horario/{obj.numHor}/')  # Asegúrate del nombre del contenedor
             if response.status_code == 200:
-                return response.json().get('fecHora', '')
-        except:
-            return None
-        return None
+                data = response.json()
+                if isinstance(data, list) and data:
+                    return data[0]
+            return "No encontrado"
+        except Exception as e:
+            return f"Error: {e}"
