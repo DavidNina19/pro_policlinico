@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><title>Registro</title></head>
+<body>
+  <h2>Registro de Paciente</h2>
+  <form id="registroForm">
+    <input type="text" name="dni" placeholder="DNI" required><br>
+    <input type="text" name="nombre" placeholder="Nombre" required><br>
+    <input type="text" name="apellido" placeholder="Apellido" required><br>
+    <input type="text" name="edad" placeholder="Edad" required><br>
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="text" name="celular" placeholder="Celular" required><br>
+    <input type="password" name="password" placeholder="Contraseña" required><br>
+    <button type="submit">Registrar</button>
+  </form>
+  <p id="mensaje"></p>
+
+  <script>
+    const form = document.getElementById('registroForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch('http://localhost:5008/api/register/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      document.getElementById('mensaje').innerText = result.mensaje || result.error;
+
+      if (res.status === 201) {
+        alert("Registro exitoso");
+        window.location.href = "/login";
+      }
+    });
+  </script>
+</body>
+</html>

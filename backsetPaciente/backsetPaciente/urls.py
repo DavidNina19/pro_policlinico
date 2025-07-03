@@ -1,5 +1,5 @@
 """
-URL configuration for backPaciente project.
+URL configuration for backsetPaciente project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from pacienteApp.views import LoginPaciente
+from pacienteApp.views import RegistroPaciente
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/login/', LoginPaciente.as_view(), name='login_paciente'),
+    path('api/register/', RegistroPaciente.as_view(), name='registro_paciente'),
 ]

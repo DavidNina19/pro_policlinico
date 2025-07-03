@@ -176,6 +176,44 @@ services:
       command: python manage.py runserver 0.0.0.0:5000
       networks:
         - app_network
+    backsetpaciente:
+      build:
+        context: ./backsetPaciente
+      ports:
+        - "5008:5000"
+      volumes:
+        - ./backsetPaciente:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    clientlogin:
+      build:
+        context: ./clientLogin
+      ports:
+        - "5050:5000"
+      volumes:
+        - ./clientLogin:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
 
 volumes:
   mysql_data:
