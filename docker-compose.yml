@@ -156,13 +156,14 @@ services:
       command: python manage.py runserver 0.0.0.0:5000
       networks:
         - app_network
-    detallemedico:
+
+    backpaciente:
       build:
-        context: ./detallemedico
+        context: ./backPaciente
       ports:
         - "5007:5000"
       volumes:
-        - ./detallemedico:/app
+        - ./backPaciente:/app
       depends_on:
         db:
           condition: service_healthy
