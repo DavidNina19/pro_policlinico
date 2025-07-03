@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
-<head><title>Login</title></head>
+<head>
+  <title>Login</title>
+</head>
 <body>
   <h2>Login de Paciente</h2>
   <form id="loginForm">
@@ -8,6 +10,7 @@
     <input type="password" name="password" placeholder="Contraseña" required><br>
     <button type="submit">Ingresar</button>
   </form>
+  <p id="nombre"></p>
   <p id="mensaje"></p>
 
   <script>
@@ -20,11 +23,19 @@
       const res = await fetch(`http://localhost:5007/api/login/?dni=${dni}&password=${password}`);
       const result = await res.json();
       document.getElementById('mensaje').innerText = result.mensaje || result.error;
+      document.getElementById('nombre').innerText = result.dni || result.error;
 
       if (res.status === 200) {
-        window.location.href = "http://localhost:5051/incio";
-        //alert("Login exitoso");
-        // Redirigir a panel o dashboard aquí
+        // Guardamos datos localmente para uso posterior
+        localStorage.setItem('dni', result.dni);
+        localStorage.setItem('cargo', result.cargo);
+
+        // Redirección según el cargo
+        if (result.cargo === 'admin') {
+          window.location.href = '/panelAdmin';
+        } else {
+          window.location.href = 'http://localhost:5051/inicio/';
+        }
       }
     });
   </script>

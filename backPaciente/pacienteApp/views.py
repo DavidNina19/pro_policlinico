@@ -4,6 +4,7 @@ from rest_framework import status
 from django.contrib.auth.hashers import make_password, check_password
 from .models import Paciente
 
+
 class LoginPaciente(APIView):
     def get(self, request):
         dni = request.query_params.get('dni')
@@ -12,7 +13,11 @@ class LoginPaciente(APIView):
         try:
             paciente = Paciente.objects.get(dni=dni, estado='A')
             if check_password(password, paciente.password):
-                return Response({'mensaje': 'Login exitoso'}, status=status.HTTP_200_OK)
+                return Response({
+                    'mensaje': 'Login exitoso',
+                    'dni': paciente.nombre,
+                    'cargo': paciente.cargo
+                }, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
         except Paciente.DoesNotExist:

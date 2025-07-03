@@ -5,11 +5,12 @@ class Paciente(models.Model):
     dni = models.CharField(max_length=10, unique=True)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    edad = models.CharField(max_length=3)
+    edad = models.IntegerField()
     email = models.EmailField()
     celular = models.CharField(max_length=20)
     password = models.TextField()
-    estado = models.CharField(max_length=1, default='A')
+    estado = models.CharField(max_length=1, default='A')  # Activo/Inactivo
+    cargo = models.CharField(max_length=20, default='paciente')  # paciente / admin
 
     class Meta:
         db_table = 'paciente'
