@@ -20,6 +20,6 @@ from horarioApp.views import HorarioListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('listar/horario/<str:ident>/', HorarioListView.as_view(), name='horario_list'),
+    path('listar/horario/', HorarioListView.as_view(), name='horario_list'),
 
 ]

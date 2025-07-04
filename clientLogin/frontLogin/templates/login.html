@@ -24,15 +24,16 @@
       const result = await res.json();
       document.getElementById('mensaje').innerText = result.mensaje || result.error;
       document.getElementById('nombre').innerText = result.dni || result.error;
-
+      //alert("RESULTADO DEL LOGIN:", result);
       if (res.status === 200) {
         // Guardamos datos localmente para uso posterior
         localStorage.setItem('dni', result.dni);
         localStorage.setItem('cargo', result.cargo);
+        //alert("Guardado en localStorage:", result.dni, result.cargo);
 
         // Redirección según el cargo
         if (result.cargo === 'admin') {
-          window.location.href = '/panelAdmin';
+          window.location.href = 'http://localhost:5052/panelAdmin';
         } else {
           window.location.href = 'http://localhost:5051/inicio/';
         }

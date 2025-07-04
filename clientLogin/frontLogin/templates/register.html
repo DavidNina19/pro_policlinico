@@ -21,6 +21,7 @@
       e.preventDefault();
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
+      console.log("Datos del formulario:", data);
 
       const res = await fetch('http://localhost:5008/api/register/', {
         method: 'POST',

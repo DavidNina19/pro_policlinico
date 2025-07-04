@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INICIO</title>
+    <title>INICIO | SEGURO</title>
 </head>
 <body>
-    <h1>INICIO PACIENTE</h1>
+    <p>Bienvenido,</p>
+    <button onclick="logout()">Cerrar sesión</button>
 </body>
 </html>
 <script>
-  const cargo = localStorage.getItem('cargo');
-  if (cargo !== 'paciente') {
-    alert('Acceso restringido solo para pacientes.');
-    window.location.href = '/login';
-  }
+    function logout() {
+    localStorage.clear();
+    window.location.href = 'http://localhost:5050/login/';
+    }
 </script>

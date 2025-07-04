@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from frontApp.views import panel_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('panelAdmin/', panel_view, name='panel'),  # URL para el panel de control
 ]

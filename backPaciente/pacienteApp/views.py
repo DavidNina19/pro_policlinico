@@ -15,7 +15,7 @@ class LoginPaciente(APIView):
             if check_password(password, paciente.password):
                 return Response({
                     'mensaje': 'Login exitoso',
-                    'dni': paciente.nombre,
+                    'dni': paciente.dni,
                     'cargo': paciente.cargo
                 }, status=status.HTTP_200_OK)
             else:

@@ -20,5 +20,5 @@ from medicoApp.views import MedicoListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('listar/medico/<str:especial>/', MedicoListView.as_view(), name='medico-list'),
+    path('listar/medico/', MedicoListView.as_view(), name='medico-list'),
 ]

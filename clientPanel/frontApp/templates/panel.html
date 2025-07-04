@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANEL</title>
+</head>
+<body>
+    <h1>PANEL</h1>
+    <button onclick="logout()">Cerrar sesión</button>
+</body>
+</html>
+<script>
+  const dni = localStorage.getItem('dni');
+  //const cargo = localStorage.getItem('cargo');
+  console.log("DNI:", dni);
+  console.log("Cargo:", cargo);
+
+  //if (!dni || !cargo) {
+  //  alert('No has iniciado sesión correctamente.');
+  //  window.location.href = 'http://localhost:5050/login/';
+  //}
+</script>
+
+<script>
+  function logout() {
+    localStorage.clear();
+    window.location.href = 'http://localhost:5050/login/';
+  }
+</script>
+

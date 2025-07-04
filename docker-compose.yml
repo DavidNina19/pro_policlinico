@@ -195,6 +195,25 @@ services:
       command: python manage.py runserver 0.0.0.0:5000
       networks:
         - app_network
+    detallemedico:
+      build:
+        context: ./detalleMedico
+      ports:
+        - "5009:5000"
+      volumes:
+        - ./detalleMedico:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
     clientlogin:
       build:
         context: ./clientLogin
@@ -221,6 +240,25 @@ services:
         - "5051:5000"
       volumes:
         - ./clientInicio:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    clientpanel:
+      build:
+        context: ./clientPanel
+      ports:
+        - "5052:5000"
+      volumes:
+        - ./clientPanel:/app
       depends_on:
         db:
           condition: service_healthy
