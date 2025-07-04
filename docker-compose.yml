@@ -157,25 +157,6 @@ services:
       networks:
         - app_network
 
-    backpaciente:
-      build:
-        context: ./backPaciente
-      ports:
-        - "5007:5000"
-      volumes:
-        - ./backPaciente:/app
-      depends_on:
-        db:
-          condition: service_healthy
-      environment:
-        - DB_HOST=db
-        - DB_PORT=3306
-        - DB_NAME=clinica
-        - DB_USER=root
-        - DB_PASSWORD=root
-      command: python manage.py runserver 0.0.0.0:5000
-      networks:
-        - app_network
     backsetpaciente:
       build:
         context: ./backsetPaciente
@@ -202,6 +183,25 @@ services:
         - "5009:5000"
       volumes:
         - ./detalleMedico:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    detallehora:
+      build:
+        context: ./detalleHora
+      ports:
+        - "5010:5000"
+      volumes:
+        - ./detalleHora:/app
       depends_on:
         db:
           condition: service_healthy

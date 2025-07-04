@@ -1,5 +1,5 @@
 """
-ASGI config for backPaciente project.
+ASGI config for detalleHora project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backPaciente.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'detalleHora.settings')
 
 application = get_asgi_application()
