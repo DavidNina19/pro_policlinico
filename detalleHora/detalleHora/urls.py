@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from detallehoraApp.views import DetalleHoraListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('listar/detallehora/', DetalleHoraListView.as_view(), name='detallehora-list'),
 ]

@@ -4,4 +4,4 @@ from .models import Hora
 class HoraSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hora
-        fields = ['codHora', 'horaIni', 'horaFin']
+        fields = ['codHor', 'horaIni', 'horaFin']

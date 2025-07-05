@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'horaApp'
+    'detallehoraApp',  # Asegúrate de que este es el nombre correcto de tu aplicación
 ]
 
 MIDDLEWARE = [

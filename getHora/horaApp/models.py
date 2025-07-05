@@ -1,7 +1,7 @@
 from django.db import models
 
 class Hora(models.Model):
-    codHora = models.AutoField(primary_key=True)
+    codHor = models.AutoField(primary_key=True)
     horaIni = models.TimeField()
     horaFin = models.TimeField()
 

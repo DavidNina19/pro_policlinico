@@ -7,11 +7,11 @@ class HoraListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Hora.objects.all()
-        codHora = self.request.query_params.get('codHora', None)
+        codHor = self.request.query_params.get('codHor', None)
         horaIni = self.request.query_params.get('horaIni', None)
 
-        if codHora is not None:
-            queryset = queryset.filter(codHora=codHora)
+        if codHor is not None:
+            queryset = queryset.filter(codHor=codHor)
         if horaIni is not None:
             queryset = queryset.filter(horaIni=horaIni)
 
