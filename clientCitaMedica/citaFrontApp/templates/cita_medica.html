@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}Generar Cita Médica Detallada | POLICLINICO{% endblock title %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row">
+        <h3>Generar Cita Médica</h3>
+        <div class="col-12">
+            <form method="POST" action="{% url 'cita_medica_view' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="especialidad" class="form-label">Especialidad</label>
+                            <select name="especialidad" id="especialidad" class="form-select" required>
+                                <option value="">Seleccionar Especialidad</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="medico" class="form-label">Médico</label>
+                            <select name="medico" id="medico" class="form-select" required disabled>
+                                <option value="">Seleccionar Médico</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="consultorio" class="form-label">Consultorio</label>
+                            <select name="consultorio" id="consultorio" class="form-select" required disabled>
+                                <option value="">Seleccionar Consultorio</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Fecha de Cita</label>
+                            <select name="fecha" id="fecha" class="form-select" required disabled>
+                                <option value="">Seleccionar Fecha</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="mb-3">
+                            <label for="hora" class="form-label">Hora de Cita</label>
+                            <select name="hora" id="hora" class="form-select" required disabled>
+                                <option value="">Seleccionar Hora</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="mb-3">
+                            <label for="dni" class="form-label">DNI:</label>
+                            <input type="text" name="dni" id="dni" class="form-control"
+                                placeholder="Ingrese su DNI (8 dígitos)" required pattern="[0-9]{8}" maxlength="8"
+                                inputmode="numeric" title="Ingrese exactamente 8 dígitos numéricos.">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Generar Cita</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectEspecialidad = document.getElementById('especialidad');
+        const selectMedico = document.getElementById('medico');
+        const selectConsultorio = document.getElementById('consultorio');
+        const selectFecha = document.getElementById('fecha');
+        const selectHora = document.getElementById('hora');
+
+        let allDetalles = []; // Para almacenar todos los datos del API una vez
+
+        // --- Funciones para limpiar y habilitar/deshabilitar selects ---
+        function resetSelect(selectElement, defaultText) {
+            selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+            selectElement.disabled = true;
+        }
+
+        function enableSelect(selectElement) {
+            selectElement.disabled = false;
+        }
+
+        // --- Función principal para cargar todos los detalles desde la API ---
+        async function loadAllDetalles() {
+            try {
+                // Asume que tu servicio de DetalleHora está en el puerto 5003
+                const res = await fetch('http://192.168.1.42:5010/listar/detallehora/');
+                if (res.ok) {
+                    allDetalles = await res.json();
+                    loadEspecialidades(); // Una vez cargados todos los detalles, carga las especialidades
+                } else {
+                    console.error('Error al cargar los detalles de hora:', res.statusText);
+                    alert('No se pudieron cargar los detalles de citas. Intente más tarde.');
+                }
+            } catch (error) {
+                console.error('Error de red o al procesar los detalles de hora:', error);
+                alert('Hubo un problema de conexión con el servicio de detalles de cita.');
+            }
+        }
+
+        // --- Carga las especialidades únicas ---
+        function loadEspecialidades() {
+            resetSelect(selectEspecialidad, 'Seleccionar Especialidad');
+            resetSelect(selectMedico, 'Seleccionar Médico');
+            resetSelect(selectConsultorio, 'Seleccionar Consultorio');
+            resetSelect(selectFecha, 'Seleccionar Fecha');
+            resetSelect(selectHora, 'Seleccionar Hora');
+
+            const especialidadesUnicas = new Set();
+            allDetalles.forEach(detalle => {
+                if (detalle.nomMed && detalle.nomMed.especialidad) {
+                    especialidadesUnicas.add(detalle.nomMed.especialidad.toLowerCase());
+                }
+            });
+
+            const sortedEspecialidades = Array.from(especialidadesUnicas).sort();
+            sortedEspecialidades.forEach(especialidad => {
+                const option = document.createElement('option');
+                option.value = especialidad;
+                option.textContent = especialidad.charAt(0).toUpperCase() + especialidad.slice(1);
+                selectEspecialidad.appendChild(option);
+            });
+            enableSelect(selectEspecialidad);
+        }
+
+        // --- Carga los médicos según la especialidad seleccionada ---
+        selectEspecialidad.addEventListener('change', function () {
+            const selectedEspecialidad = this.value;
+            resetSelect(selectMedico, 'Seleccionar Médico');
+            resetSelect(selectConsultorio, 'Seleccionar Consultorio');
+            resetSelect(selectFecha, 'Seleccionar Fecha');
+            resetSelect(selectHora, 'Seleccionar Hora');
+
+            if (!selectedEspecialidad) {
+                return;
+            }
+
+            const medicosFiltrados = new Map(); // Usamos Map para asegurar unicidad y guardar el codMed
+            allDetalles.forEach(detalle => {
+                if (detalle.nomMed && detalle.nomMed.especialidad &&
+                    detalle.nomMed.especialidad.toLowerCase() === selectedEspecialidad &&
+                    detalle.estado === 'A') { // Solo médicos con estado 'A'
+                    medicosFiltrados.set(detalle.codMed, detalle.nomMed.nombre); // codMed como key, nomMed como value
+                }
+            });
+
+            if (medicosFiltrados.size > 0) {
+                const sortedMedicos = Array.from(medicosFiltrados.entries()).sort((a, b) => a[1].localeCompare(b[1])); // Ordenar por nombre del médico
+                sortedMedicos.forEach(([codMed, nomMed]) => {
+                    const option = document.createElement('option');
+                    option.value = codMed; // El valor es el codMed
+                    option.textContent = nomMed; // El texto es el nombre del médico
+                    selectMedico.appendChild(option);
+                });
+                enableSelect(selectMedico);
+            } else {
+                selectMedico.innerHTML = '<option value="">No hay médicos disponibles para esta especialidad</option>';
+            }
+        });
+
+        // --- Carga los consultorios, fechas y horas según médico seleccionado ---
+        selectMedico.addEventListener('change', function () {
+            const selectedMedicoCod = parseInt(this.value); // Convertir a número
+            resetSelect(selectConsultorio, 'Seleccionar Consultorio');
+            resetSelect(selectFecha, 'Seleccionar Fecha');
+            resetSelect(selectHora, 'Seleccionar Hora');
+
+            if (isNaN(selectedMedicoCod)) {
+                return;
+            }
+
+            const detallesFiltradosPorMedico = allDetalles.filter(detalle =>
+                detalle.codMed === selectedMedicoCod && detalle.estado === 'A'
+            );
+
+            // Cargar Consultorios
+            const consultoriosUnicos = new Set();
+            detallesFiltradosPorMedico.forEach(detalle => {
+                consultoriosUnicos.add(detalle.consul);
+            });
+
+            if (consultoriosUnicos.size > 0) {
+                Array.from(consultoriosUnicos).sort().forEach(consul => {
+                    const option = document.createElement('option');
+                    option.value = consul;
+                    option.textContent = consul;
+                    selectConsultorio.appendChild(option);
+                });
+                enableSelect(selectConsultorio);
+            } else {
+                selectConsultorio.innerHTML = '<option value="">No hay consultorios disponibles</option>';
+            }
+        });
+
+        // --- Carga las fechas según consultorio seleccionado ---
+        selectConsultorio.addEventListener('change', function () {
+            const selectedEspecialidad = selectEspecialidad.value;
+            const selectedMedicoCod = parseInt(selectMedico.value);
+            const selectedConsultorio = this.value;
+
+            resetSelect(selectFecha, 'Seleccionar Fecha');
+            resetSelect(selectHora, 'Seleccionar Hora');
+
+            if (!selectedConsultorio || isNaN(selectedMedicoCod) || !selectedEspecialidad) {
+                return;
+            }
+
+            const detallesFiltrados = allDetalles.filter(detalle =>
+                detalle.codMed === selectedMedicoCod &&
+                detalle.consul === selectedConsultorio &&
+                detalle.estado === 'A' &&
+                detalle.nomMed.especialidad.toLowerCase() === selectedEspecialidad
+            );
+
+            const fechasUnicas = new Set();
+            detallesFiltrados.forEach(detalle => {
+                fechasUnicas.add(detalle.fecHora);
+            });
+
+            if (fechasUnicas.size > 0) {
+                // Ordenar fechas cronológicamente
+                Array.from(fechasUnicas).sort((a, b) => new Date(a) - new Date(b)).forEach(fecha => {
+                    const option = document.createElement('option');
+                    option.value = fecha;
+                    option.textContent = fecha;
+                    selectFecha.appendChild(option);
+                });
+                enableSelect(selectFecha);
+            } else {
+                selectFecha.innerHTML = '<option value="">No hay fechas disponibles</option>';
+            }
+        });
+
+        // --- Carga las horas según la fecha seleccionada ---
+        selectFecha.addEventListener('change', function () {
+            const selectedEspecialidad = selectEspecialidad.value;
+            const selectedMedicoCod = parseInt(selectMedico.value);
+            const selectedConsultorio = selectConsultorio.value;
+            const selectedFecha = this.value;
+
+            resetSelect(selectHora, 'Seleccionar Hora');
+
+            if (!selectedFecha || !selectedConsultorio || isNaN(selectedMedicoCod) || !selectedEspecialidad) {
+                return;
+            }
+
+            const detallesFiltrados = allDetalles.filter(detalle =>
+                detalle.codMed === selectedMedicoCod &&
+                detalle.consul === selectedConsultorio &&
+                detalle.fecHora === selectedFecha &&
+                detalle.estado === 'A' &&
+                detalle.nomMed.especialidad.toLowerCase() === selectedEspecialidad
+            );
+
+            // Usamos un Map para almacenar horas únicas y su codHor (si es relevante)
+            const horasUnicas = new Map();
+            detallesFiltrados.forEach(detalle => {
+                if (detalle.hora && detalle.hora.horaIni) {
+                    horasUnicas.set(detalle.codHor, detalle.hora.horaIni); // Usar codHor como value, horaIni como text
+                }
+            });
+
+            if (horasUnicas.size > 0) {
+                // Ordenar horas cronológicamente (asumiendo formato HH:MM:SS)
+                Array.from(horasUnicas.entries()).sort((a, b) => a[1].localeCompare(b[1])).forEach(([codHor, horaIni]) => {
+                    const option = document.createElement('option');
+                    option.value = codHor; // El valor que se enviará con el formulario
+                    option.textContent = horaIni; // El texto visible
+                    selectHora.appendChild(option);
+                });
+                enableSelect(selectHora);
+            } else {
+                selectHora.innerHTML = '<option value="">No hay horas disponibles</option>';
+            }
+        });
+
+        // --- Iniciar el proceso cargando todos los detalles ---
+        loadAllDetalles();
+    });
+</script>
+{% endblock scripts %}
