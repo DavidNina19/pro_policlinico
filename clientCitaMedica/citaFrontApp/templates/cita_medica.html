@@ -7,7 +7,8 @@
     <div class="row">
         <h3>Generar Cita Médica</h3>
         <div class="col-12">
-            <form method="POST" action="{% url 'cita_medica_view' %}">
+            <!-- Eliminamos action y method del form para manejar el envío con JS -->
+            <form id="citaMedicaForm">
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-6">
@@ -56,10 +57,23 @@
                     </div>
                     <div class="col-4">
                         <div class="mb-3">
-                            <label for="dni" class="form-label">DNI:</label>
+                            <label for="codPago" class="form-label">Código de Pago:</label>
+                            <!-- Nuevo campo para codPago, ya que es requerido por el modelo CitaMedica -->
+                            <input type="text" name="codPago" id="codPago" class="form-control"
+                                placeholder="Ingrese código de pago" required maxlength="10">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label for="dni" class="form-label">DNI Paciente:</label>
                             <input type="text" name="dni" id="dni" class="form-control"
-                                placeholder="Ingrese su DNI (8 dígitos)" required pattern="[0-9]{8}" maxlength="8"
+                                placeholder="Ingrese DNI del paciente (8 dígitos)" required pattern="[0-9]{8}" maxlength="8"
                                 inputmode="numeric" title="Ingrese exactamente 8 dígitos numéricos.">
+                            <!-- Nota: El DNI se usa aquí para identificar al paciente,
+                                 pero no se envía directamente al modelo CitaMedica
+                                 a menos que se modifique el modelo y la API para incluirlo. -->
                         </div>
                     </div>
                 </div>
@@ -78,6 +92,9 @@
         const selectConsultorio = document.getElementById('consultorio');
         const selectFecha = document.getElementById('fecha');
         const selectHora = document.getElementById('hora');
+        const inputCodPago = document.getElementById('codPago'); // Nuevo input para codPago
+        const inputDni = document.getElementById('dni'); // Obtener el input DNI
+        const form = document.getElementById('citaMedicaForm'); // Obtener el formulario
 
         let allDetalles = []; // Para almacenar todos los datos del API una vez
 
@@ -94,8 +111,8 @@
         // --- Función principal para cargar todos los detalles desde la API ---
         async function loadAllDetalles() {
             try {
-                // Asume que tu servicio de DetalleHora está en el puerto 5003
-                const res = await fetch('http://192.168.1.42:5010/listar/detallehora/');
+                // Asume que tu servicio de DetalleHora está en el puerto 5010
+                const res = await fetch('http://localhost:5010/listar/detallehora/');
                 if (res.ok) {
                     allDetalles = await res.json();
                     loadEspecialidades(); // Una vez cargados todos los detalles, carga las especialidades
@@ -282,6 +299,74 @@
                 enableSelect(selectHora);
             } else {
                 selectHora.innerHTML = '<option value="">No hay horas disponibles</option>';
+            }
+        });
+
+        // --- Manejar el envío del formulario a la API POST ---
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevenir el envío tradicional del formulario
+
+            // Recolectar los datos necesarios para la API de CitaMedica
+            const numHorValue = selectHora.options[selectHora.selectedIndex].textContent; // La hora real (ej. "10:00:00")
+            const codMedValue = selectMedico.value;
+            const codHorValue = selectHora.value; // El código de la hora
+            const codPagoValue = inputCodPago.value;
+            const consultorioValue = selectConsultorio.value;
+            const dniValue = inputDni.value; // Obtener el valor del DNI
+            const estadoValue = 'A'; // Por defecto 'A' para nuevas citas, según tu modelo
+
+            // Validar que todos los campos requeridos para la API estén seleccionados/ingresados
+            if (!numHorValue || !codMedValue || !codHorValue || !codPagoValue || !consultorioValue || !dniValue) {
+                alert('Por favor, complete todos los campos de la cita médica, incluyendo el DNI.');
+                return;
+            }
+
+            const citaData = {
+                numHor: numHorValue,
+                codMed: codMedValue,
+                codHor: codHorValue,
+                codPago: codPagoValue,
+                consultorio: consultorioValue,
+                dni: dniValue, // Incluir el DNI en los datos a enviar
+                estado: estadoValue
+            };
+
+            const apiUrl = 'http://localhost:5011/create/cita/'; // Asegúrate de que esta sea la URL correcta de tu API
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}' // Importante para la seguridad en Django
+                    },
+                    body: JSON.stringify(citaData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error al registrar la cita:', errorData);
+                    let errorMessage = 'Error desconocido al registrar la cita.';
+                    if (errorData.error) {
+                        errorMessage = errorData.error;
+                    } else if (errorData.mensaje) {
+                        errorMessage = errorData.mensaje;
+                    } else if (typeof errorData === 'object') {
+                        // Si es un objeto de errores de validación de DRF
+                        errorMessage = Object.values(errorData).flat().join('\n');
+                    }
+                    alert('Error al registrar la cita: ' + errorMessage);
+                } else {
+                    const responseData = await response.json();
+                    console.log('Cita registrada exitosamente:', responseData);
+                    alert('Cita registrada exitosamente. Código de Cita: ' + responseData.codCita);
+                    // Opcional: Resetear el formulario o redirigir
+                    form.reset();
+                    loadEspecialidades(); // Volver a cargar las especialidades para limpiar el form
+                }
+            } catch (error) {
+                console.error('Hubo un problema de conexión o en la solicitud:', error);
+                alert('No se pudo conectar con el servidor de citas. Intente más tarde.');
             }
         });
 
