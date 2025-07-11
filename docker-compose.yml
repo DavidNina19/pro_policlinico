@@ -233,6 +233,25 @@ services:
       command: python manage.py runserver 0.0.0.0:5000
       networks:
         - app_network
+    getcitamedica:
+      build:
+        context: ./getCitaMedica
+      ports:
+        - "5012:5000"
+      volumes:
+        - ./getCitaMedica:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
     clientlogin:
       build:
         context: ./clientLogin
@@ -297,6 +316,25 @@ services:
         - "5053:5000"
       volumes:
         - ./clientCitaMedica:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    clienttablacitas:
+      build:
+        context: ./clientTablaCitas
+      ports:
+        - "5054:5000"
+      volumes:
+        - ./clientTablaCitas:/app
       depends_on:
         db:
           condition: service_healthy

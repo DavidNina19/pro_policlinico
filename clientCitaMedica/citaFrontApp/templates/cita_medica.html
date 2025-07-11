@@ -34,6 +34,7 @@
                             <label for="consultorio" class="form-label">Consultorio</label>
                             <select name="consultorio" id="consultorio" class="form-select" required disabled>
                                 <option value="">Seleccionar Consultorio</option>
+                            </option>
                             </select>
                         </div>
                     </div>
@@ -55,14 +56,6 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-4">
-                        <div class="mb-3">
-                            <label for="codPago" class="form-label">Código de Pago:</label>
-                            <!-- Nuevo campo para codPago, ya que es requerido por el modelo CitaMedica -->
-                            <input type="text" name="codPago" id="codPago" class="form-control"
-                                placeholder="Ingrese código de pago" required maxlength="10">
-                        </div>
-                    </div>
                 </div>
                 <div class="row">
                     <div class="col-12">
@@ -71,9 +64,6 @@
                             <input type="text" name="dni" id="dni" class="form-control"
                                 placeholder="Ingrese DNI del paciente (8 dígitos)" required pattern="[0-9]{8}" maxlength="8"
                                 inputmode="numeric" title="Ingrese exactamente 8 dígitos numéricos.">
-                            <!-- Nota: El DNI se usa aquí para identificar al paciente,
-                                 pero no se envía directamente al modelo CitaMedica
-                                 a menos que se modifique el modelo y la API para incluirlo. -->
                         </div>
                     </div>
                 </div>
@@ -92,9 +82,8 @@
         const selectConsultorio = document.getElementById('consultorio');
         const selectFecha = document.getElementById('fecha');
         const selectHora = document.getElementById('hora');
-        const inputCodPago = document.getElementById('codPago'); // Nuevo input para codPago
-        const inputDni = document.getElementById('dni'); // Obtener el input DNI
-        const form = document.getElementById('citaMedicaForm'); // Obtener el formulario
+        const inputDni = document.getElementById('dni');
+        const form = document.getElementById('citaMedicaForm');
 
         let allDetalles = []; // Para almacenar todos los datos del API una vez
 
@@ -240,17 +229,23 @@
                 detalle.nomMed.especialidad.toLowerCase() === selectedEspecialidad
             );
 
-            const fechasUnicas = new Set();
+            // Usamos un Map para almacenar pares únicos de fecha y numHor
+            // La clave es la fecha, el valor es el numHor asociado (siempre el mismo para esa fecha)
+            const fechasYNumHorUnicos = new Map();
             detallesFiltrados.forEach(detalle => {
-                fechasUnicas.add(detalle.fecHora);
+                // Asumimos que para una fecHora, detalle.numHor es consistente.
+                // Si no, necesitaríamos una lógica más compleja para elegir cuál numHor usar.
+                fechasYNumHorUnicos.set(detalle.fecHora, detalle.numHor); 
             });
 
-            if (fechasUnicas.size > 0) {
+            if (fechasYNumHorUnicos.size > 0) {
                 // Ordenar fechas cronológicamente
-                Array.from(fechasUnicas).sort((a, b) => new Date(a) - new Date(b)).forEach(fecha => {
+                Array.from(fechasYNumHorUnicos.entries()).sort((a, b) => new Date(a[0]) - new Date(b[0])).forEach(([fecHora, numHor]) => {
                     const option = document.createElement('option');
-                    option.value = fecha;
-                    option.textContent = fecha;
+                    option.value = fecHora; // El valor de la opción es la fecha (fecHora)
+                    // Almacenamos el numHor en un atributo de datos para recuperarlo después
+                    option.dataset.numHor = numHor; 
+                    option.textContent = fecHora;
                     selectFecha.appendChild(option);
                 });
                 enableSelect(selectFecha);
@@ -264,7 +259,7 @@
             const selectedEspecialidad = selectEspecialidad.value;
             const selectedMedicoCod = parseInt(selectMedico.value);
             const selectedConsultorio = selectConsultorio.value;
-            const selectedFecha = this.value;
+            const selectedFecha = this.value; // Esto es fecHora
 
             resetSelect(selectHora, 'Seleccionar Hora');
 
@@ -292,8 +287,8 @@
                 // Ordenar horas cronológicamente (asumiendo formato HH:MM:SS)
                 Array.from(horasUnicas.entries()).sort((a, b) => a[1].localeCompare(b[1])).forEach(([codHor, horaIni]) => {
                     const option = document.createElement('option');
-                    option.value = codHor; // El valor que se enviará con el formulario
-                    option.textContent = horaIni; // El texto visible
+                    option.value = codHor; // El valor que se enviará con el formulario (codHor)
+                    option.textContent = horaIni; // El texto visible (horaIni)
                     selectHora.appendChild(option);
                 });
                 enableSelect(selectHora);
@@ -307,31 +302,34 @@
             event.preventDefault(); // Prevenir el envío tradicional del formulario
 
             // Recolectar los datos necesarios para la API de CitaMedica
-            const numHorValue = selectHora.options[selectHora.selectedIndex].textContent; // La hora real (ej. "10:00:00")
+            // numHorValue debe ser la FECHA (ej. "10-07-2025")
+            const selectedFechaOption = selectFecha.options[selectFecha.selectedIndex];
+            const numHorValue = selectedFechaOption ? selectedFechaOption.dataset.numHor : ''; 
+            
             const codMedValue = selectMedico.value;
-            const codHorValue = selectHora.value; // El código de la hora
-            const codPagoValue = inputCodPago.value;
+            // codHorValue debe ser la HORA (ej. "08:00")
+            const codHorValue = selectHora.value; 
             const consultorioValue = selectConsultorio.value;
             const dniValue = inputDni.value; // Obtener el valor del DNI
-            const estadoValue = 'A'; // Por defecto 'A' para nuevas citas, según tu modelo
+            const estadoValue = 'P'; // Por defecto 'A' para nuevas citas, según tu modelo
 
             // Validar que todos los campos requeridos para la API estén seleccionados/ingresados
-            if (!numHorValue || !codMedValue || !codHorValue || !codPagoValue || !consultorioValue || !dniValue) {
+            if (!numHorValue || !codMedValue || !codHorValue || !consultorioValue || !dniValue) {
                 alert('Por favor, complete todos los campos de la cita médica, incluyendo el DNI.');
                 return;
             }
 
             const citaData = {
-                numHor: numHorValue,
+                numHor: numHorValue,      // Ahora es la fecha (ej. "10-07-2025")
                 codMed: codMedValue,
-                codHor: codHorValue,
-                codPago: codPagoValue,
+                codHor: codHorValue,      // Ahora es la hora (ej. "08:00")
                 consultorio: consultorioValue,
-                dni: dniValue, // Incluir el DNI en los datos a enviar
+                dni: dniValue,
                 estado: estadoValue
             };
 
-            const apiUrl = 'http://localhost:5011/create/cita/'; // Asegúrate de que esta sea la URL correcta de tu API
+            // Asegúrate de que esta sea la URL correcta de tu API.
+            const apiUrl = 'http://localhost:5011/create/cita/'; 
 
             try {
                 const response = await fetch(apiUrl, {
@@ -352,7 +350,7 @@
                     } else if (errorData.mensaje) {
                         errorMessage = errorData.mensaje;
                     } else if (typeof errorData === 'object') {
-                        // Si es un objeto de errores de validación de DRF
+                        // Si es un objeto de errores de validación de DRF, muestra los mensajes de error
                         errorMessage = Object.values(errorData).flat().join('\n');
                     }
                     alert('Error al registrar la cita: ' + errorMessage);
@@ -374,4 +372,5 @@
         loadAllDetalles();
     });
 </script>
+
 {% endblock scripts %}

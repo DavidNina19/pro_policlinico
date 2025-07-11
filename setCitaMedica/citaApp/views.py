@@ -14,7 +14,7 @@ class RegistroCitaMedica(APIView):
         data = request.data
 
         # Validar que los campos obligatorios estén presentes en la solicitud
-        required_fields = ['numHor', 'codMed', 'codHor', 'codPago', 'consultorio']
+        required_fields = ['numHor', 'codMed', 'codHor', 'consultorio', 'dni']
         for field in required_fields:
             if field not in data:
                 return Response(
@@ -30,10 +30,10 @@ class RegistroCitaMedica(APIView):
                 numHor=data['numHor'],
                 codMed=data['codMed'],
                 codHor=data['codHor'],
-                codPago=data['codPago'],
                 consultorio=data['consultorio'],
+                dni = data['dni'],
                 # 'estado' es opcional, si no se proporciona, usa el valor por defecto 'A'
-                estado=data.get('estado', 'A') 
+                estado=data.get('estado', 'P') 
             )
             # Retornar una respuesta de éxito con el ID de la cita creada
             return Response(
