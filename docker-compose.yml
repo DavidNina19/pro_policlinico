@@ -199,7 +199,7 @@ services:
       build:
         context: ./detalleHora
       ports:
-        - "5010:5000"
+        - "5013:5000"
       volumes:
         - ./detalleHora:/app
       depends_on:
@@ -240,6 +240,82 @@ services:
         - "5012:5000"
       volumes:
         - ./getCitaMedica:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    sethorario:
+      build:
+        context: ./setHorario
+      ports:
+        - "5014:5000"
+      volumes:
+        - ./setHorario:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    getanalisis:
+      build:
+        context: ./getAnalisis
+      ports:
+        - "5015:5000"
+      volumes:
+        - ./getAnalisis:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    setanalisis:
+      build:
+        context: ./setAnalisis
+      ports:
+        - "5016:5000"
+      volumes:
+        - ./setAnalisis:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    detalleanalisis:
+      build:
+        context: ./detalleAnalisis
+      ports:
+        - "5017:5000"
+      volumes:
+        - ./detalleAnalisis:/app
       depends_on:
         db:
           condition: service_healthy

@@ -16,18 +16,15 @@ class DetalleHoraSerializer(serializers.ModelSerializer):
 
     def get_nomMed(self, obj):
         try:
-            # Recomiendo encarecidamente usar ?codMed={obj.codMed} si codMed es el ID.
-            # Si tu API de medico espera ?nomMed={valor_del_codigo}, entonces manténlo.
-            response = requests.get(f'http://getmedico:5000/listar/medico/?codMed={obj.codMed}') # Usando codMed como sugerencia
+            response = requests.get(f'http://getmedico:5000/listar/medico/?codMed={obj.codMed}') # Usando codMed 
             response.raise_for_status() 
             data = response.json()
             
             if isinstance(data, list) and data:
-                # Asumimos que la API devuelve un diccionario como {'nomMed': 'Roberto', 'especialidad': 'Cardiología'}
                 if isinstance(data[0], dict):
                     return {
                         'nombre': data[0].get('nomMed', 'No disponible'),
-                        'especialidad': data[0].get('especial', 'No disponible') # Asume que el campo se llama 'especialidad'
+                        'especialidad': data[0].get('especial', 'No disponible')
                     }
             return {'nombre': 'No encontrado', 'especialidad': 'No encontrado'}
         except requests.exceptions.RequestException as e:
@@ -67,11 +64,10 @@ class DetalleHoraSerializer(serializers.ModelSerializer):
             data = response.json()
 
             if isinstance(data, list) and data:
-                # Asumimos que la API devuelve un diccionario como {'nomMed': 'Roberto', 'especialidad': 'Cardiología'}
                 if isinstance(data[0], dict):
                     return {
                         'horaIni': data[0].get('horaIni', 'No disponible'),
-                        'especialidad': data[0].get('horaFin', 'No disponible') # Asume que el campo se llama 'especialidad'
+                        'especialidad': data[0].get('horaFin', 'No disponible') 
                     }
             return {'hora': 'No encontrado', 'especialidad': 'No encontrado'}
         except requests.exceptions.RequestException as e:
