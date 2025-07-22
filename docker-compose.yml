@@ -328,6 +328,63 @@ services:
       command: python manage.py runserver 0.0.0.0:5000
       networks:
         - app_network
+    getmedicamentos:
+      build:
+        context: ./getMedicamentos
+      ports:
+        - "5018:5000"
+      volumes:
+        - ./getMedicamentos:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    setmedicamentos:
+      build:
+        context: ./setMedicamentos
+      ports:
+        - "5019:5000"
+      volumes:
+        - ./setMedicamentos:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
+    detallereceta:
+      build:
+        context: ./detalleReceta
+      ports:
+        - "5020:5000"
+      volumes:
+        - ./detalleReceta:/app
+      depends_on:
+        db:
+          condition: service_healthy
+      environment:
+        - DB_HOST=db
+        - DB_PORT=3306
+        - DB_NAME=clinica
+        - DB_USER=root
+        - DB_PASSWORD=root
+      command: python manage.py runserver 0.0.0.0:5000
+      networks:
+        - app_network
     clientlogin:
       build:
         context: ./clientLogin
