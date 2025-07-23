@@ -1,5 +1,5 @@
 """
-URL configuration for detalleReceta project.
+URL configuration for getAtencionMedica project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from dRecetaApp.views import DetalleRecetaListView
+from atencionApp.views import AtencionMedicaListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('listar/detallereceta/', DetalleRecetaListView.as_view(), name='detalleReceta-list'),
+    path('listar/atencion/', AtencionMedicaListView.as_view(), name='listar_atencion'),
 ]

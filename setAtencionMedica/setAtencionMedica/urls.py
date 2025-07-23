@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from atencionApp.views import AtencionMedicaCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('listar/atencion/', AtencionMedicaCreateView.as_view(), name='listar_atencion'),
 ]
